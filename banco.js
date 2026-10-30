@@ -1,5 +1,5 @@
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://banco-kesal.onrender.com";
 
 // Recuperar el usuario que inició sesión
 const nombreUsuario = sessionStorage.getItem("nombre");
