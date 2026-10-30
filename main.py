@@ -10,11 +10,12 @@ app.add_middleware(
     allow_origins=[
         "null",
         "http://127.0.0.1:8000",
-        "http://localhost:5500"
+        "http://localhost:5500",
+        "https://xkevkx2007-creator.github.io",
     ],
     allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Datos temporales en memoria
