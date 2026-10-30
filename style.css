@@ -1,0 +1,412 @@
+
+/* ========================================
+   SISTEMA BANCARIO - DARK FINTECH
+   ======================================== */
+
+:root {
+    --bg: #0b1120;
+    --surface: #111c30;
+    --surface-hover: #192741;
+    --border: #263650;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --success: #34d399;
+    --danger: #fb7185;
+    --radius: 16px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 18px;
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(37, 99, 235, 0.13),
+            transparent 35%
+        ),
+        var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.6;
+    
+}
+
+/* Contenedor principal */
+
+.container,
+main {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Títulos */
+
+h1,
+h2,
+h3 {
+    color: var(--text);
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    letter-spacing: -1px;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+p {
+    color: var(--muted);
+}
+
+hr {
+    margin: 28px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+/* Tarjetas y secciones */
+
+section,
+.card {
+    margin: 20px 0;
+    padding: 24px;
+    background: rgba(17, 28, 48, 0.92);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.2s ease;
+}
+
+section:hover,
+.card:hover {
+    border-color: #36517a;
+}
+
+/* Saldo bancario */
+
+#saldo {
+    margin: 12px 0 24px;
+    color: var(--success);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -1px;
+    overflow-wrap: anywhere;
+}
+
+/* Formularios */
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+input {
+    flex: 1 1 220px;
+    min-width: 0;
+    padding: 14px 16px;
+    color: var(--text);
+    background: #0b1425;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input::placeholder {
+    color: #71819a;
+}
+
+input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Botones */
+
+button {
+    padding: 13px 20px;
+    color: #ffffff;
+    background: var(--primary);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+button:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 5px 18px rgba(37, 99, 235, 0.22);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+/* Mensajes del sistema */
+
+#mensaje {
+    min-height: 24px;
+    margin-top: 16px;
+    color: #93c5fd;
+    overflow-wrap: anywhere;
+}
+
+/* Historial */
+
+#lista-historico {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 18px 0 0;
+    list-style: none;
+}
+
+#lista-historico li {
+    padding: 14px 16px;
+    color: var(--text);
+    background: #0b1425;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+/* Enlaces */
+
+a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #93c5fd;
+}
+
+/* Diseño adaptable a móviles */
+
+@media (max-width: 600px) {
+    body {
+        padding: 18px 12px;
+    }
+
+    section,
+    .card {
+        padding: 18px;
+        margin: 14px 0;
+    }
+
+    form {
+        flex-direction: column;
+    }
+
+    input,
+    form button {
+        width: 100%;
+        flex-basis: auto;
+    }
+
+    #saldo {
+        font-size: 2rem;
+    }
+}
+
+
+/* Centrar el contenido de toda la página */
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Centrar títulos y textos */
+
+h1,
+h2,
+h3,
+p {
+    text-align: center;
+}
+
+/* Centrar secciones y limitar su anchura */
+
+section,
+.card,
+main,
+.container {
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Centrar botones */
+
+button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Centrar formularios y sus campos */
+
+form {
+    justify-content: center;
+}
+
+input {
+    text-align: center;
+}
+
+/* Centrar el historial */
+
+#lista-historico {
+    text-align: center;
+}
+
+
+/* Historial de movimientos: diseño fintech */
+#lista-historico {
+    display: grid;
+    gap: 12px;
+    padding: 0;
+    margin: 20px 0 0;
+    list-style: none;
+    text-align: left;
+}
+
+#lista-historico .movimiento-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px;
+    background: #0b1425;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 12px;
+    text-align: left;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+#lista-historico .movimiento-item:hover {
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+}
+
+.movimiento-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.movimiento-detalles {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 3px;
+}
+
+.movimiento-titulo {
+    color: var(--text);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.movimiento-subtitulo {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.movimiento-valor {
+    flex-shrink: 0;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.movimiento-deposito {
+    border-left-color: var(--success) !important;
+}
+
+.movimiento-deposito .movimiento-icono {
+    color: var(--success);
+    background: rgba(52, 211, 153, 0.12);
+}
+
+.movimiento-deposito .movimiento-valor {
+    color: var(--success);
+}
+
+.movimiento-retiro {
+    border-left-color: var(--danger) !important;
+}
+
+.movimiento-retiro .movimiento-icono {
+    color: var(--danger);
+    background: rgba(251, 113, 133, 0.12);
+}
+
+.movimiento-retiro .movimiento-valor {
+    color: var(--danger);
+}
+
+.movimiento-transferencia {
+    border-left-color: var(--primary) !important;
+}
+
+.movimiento-transferencia .movimiento-icono {
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.movimiento-transferencia .movimiento-valor {
+    color: #60a5fa;
+}
+
+@media (max-width: 480px) {
+    #lista-historico .movimiento-item {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .movimiento-icono {
+        width: 36px;
+        height: 36px;
+    }
+
+    .movimiento-valor {
+        font-size: 0.9rem;
+    }
+}

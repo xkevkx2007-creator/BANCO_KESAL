@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Banco - Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="contenedor">
+        <h1>Mi Banco</h1>
+
+        <h2>Bienvenido, <span id="nombre-usuario"></span></h2>
+
+        <section>
+            <p>Tu saldo disponible es:</p>
+            <h1 id="saldo">R$ 0,00</h1>
+        </section>
+
+        <hr>
+
+
+
+<section>
+    <h2>Depositar dinero</h2>
+
+    <form id="form-deposito">
+        <input
+            type="number"
+            id="monto-deposito"
+            placeholder="Monto en R$"
+            min="0.01"
+            step="0.01"
+            required
+        >
+
+        <button type="submit">Depositar</button>
+    </form>
+    <br>
+
+<hr>
+
+<section>
+    <h2>Retirar dinero</h2>
+
+    <form id="form-retiro">
+        <input
+            type="number"
+            id="monto-retiro"
+            placeholder="Monto en R$"
+            min="0.01"
+            step="0.01"
+            required
+        >
+
+        <button type="submit">Retirar</button>
+    </form>
+</section>
+
+    <br>
+    
+<hr>
+
+<section>
+    <h2>Transferir dinero</h2>
+
+    <form id="form-transferencia">
+        <input
+            type="email"
+            id="correo-destino"
+            placeholder="Correo del destinatario"
+            required
+        >
+
+        <input
+            type="number"
+            id="monto-transferencia"
+            placeholder="Monto en R$"
+            min="0.01"
+            step="0.01"
+            required
+        >
+
+        <button type="submit">Transferir</button>
+    </form>
+</section>
+    <br>
+    
+<hr>
+
+<section>
+    <h2>Historial de movimientos</h2>
+
+    <button id="btn-historico" type="button">
+        Consultar movimientos
+    </button>
+
+    <ul id="lista-historico"></ul>
+</section>
+
+    <br>
+</section>
+
+        <button id="btn-actualizar">Actualizar saldo</button>
+        <br>
+        <br>
+        <button id="btn-salir" type="button">Cerrar sesión</button>
+
+        <p id="mensaje"></p>
+    </main>
+
+    <script src="banco.js"></script>
+
+
+</body>
+</html>
