@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -47,6 +46,7 @@ usuarios = [
 # Datos recibidos desde el frontend
 class UsuarioEntrada(BaseModel):
     nombre: str
+    cpf: str
     correo: str
     contraseña: str
     
@@ -67,12 +67,22 @@ def inicio():
 @app.post("/usuarios")
 def crear_cuenta(datos: UsuarioEntrada):
 
+    cpf = datos.cpf.strip()
+
+    # El CPF debe tener exactamente 11 caracteres y todos deben ser dígitos 0-9
+    if len(cpf) != 11 or not all(c in "0123456789" for c in cpf):
+        return {"error": "El CPF debe tener exactamente 11 números"}
+
     for usuario in usuarios:
         if usuario["correo"] == datos.correo:
             return {"error": "El correo ya está registrado"}
 
+        if usuario.get("cpf") == cpf:
+            return {"error": "El CPF ya está registrado"}
+
     nuevo_usuario = {
         "nombre": datos.nombre,
+        "cpf": cpf,
         "correo": datos.correo,
         "contraseña": datos.contraseña,
         "saldo": 0.0,
@@ -159,6 +169,7 @@ def depositar(datos: DepositoEntrada):
 
 class RetiroEntrada(BaseModel):
     correo: str
+    contraseña: str
     monto: float = Field(gt=0, allow_inf_nan=False)
 
 
@@ -167,6 +178,13 @@ def retirar(datos: RetiroEntrada):
 
     for usuario in usuarios:
         if usuario["correo"] == datos.correo:
+
+            # La contraseña debe coincidir con la de la cuenta
+            if datos.contraseña != usuario["contraseña"]:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Contraseña incorrecta. No se realizó el retiro."
+                )
 
             if datos.monto > usuario["saldo"]:
                 raise HTTPException(

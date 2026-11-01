@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -43,7 +42,20 @@
                 <input
                     type="text"
                     id="registro-nombre"
-                    placeholder="Nombre completo"
+                    placeholder="Nombre de usuario"
+                    required
+                >
+
+                <input
+                    type="text"
+                    id="registro-cpf"
+                    placeholder="CPF (11 números)"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    maxlength="11"
+                    minlength="11"
+                    pattern="[0-9]{11}"
+                    title="El CPF debe tener exactamente 11 números"
                     required
                 >
 

@@ -1,4 +1,3 @@
-
 const API_URL = "https://banco-kesal.onrender.com";
 
 // Recuperar el usuario que inició sesión
@@ -128,6 +127,9 @@ document.getElementById("form-retiro").addEventListener(
             document.getElementById("monto-retiro").value
         );
 
+        const campoContrasena =
+            document.getElementById("contrasena-retiro");
+
         const mensaje = document.getElementById("mensaje");
 
         if (!Number.isFinite(monto) || monto <= 0) {
@@ -143,7 +145,8 @@ document.getElementById("form-retiro").addEventListener(
                 },
                 body: JSON.stringify({
                     correo: correoUsuario,
-                    monto: monto
+                    monto: monto,
+                    contraseña: campoContrasena.value
                 })
             });
 
@@ -151,7 +154,12 @@ document.getElementById("form-retiro").addEventListener(
 
             if (!respuesta.ok) {
                 mensaje.textContent =
-                    datos.detail || "No se pudo realizar el retiro.";
+                    typeof datos.detail === "string"
+                        ? datos.detail
+                        : "No se pudo realizar el retiro.";
+
+                // Por seguridad, limpiar la contraseña tras un intento fallido
+                campoContrasena.value = "";
                 return;
             }
 
