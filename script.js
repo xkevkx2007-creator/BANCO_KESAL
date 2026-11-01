@@ -71,8 +71,19 @@ document.getElementById("form-registro").addEventListener("submit", async (event
 
         const resultado = await respuesta.json();
 
+        let detalle = "";
+
+        if (typeof resultado.detail === "string") {
+            detalle = resultado.detail;
+        } else if (Array.isArray(resultado.detail) && resultado.detail.length > 0) {
+            // Error de validación del servidor (422): indicar qué campo falló
+            const fallo = resultado.detail[0];
+            const campo = Array.isArray(fallo.loc) ? fallo.loc[fallo.loc.length - 1] : "";
+            detalle = `Error en el campo "${campo}": ${fallo.msg}`;
+        }
+
         mensaje.textContent =
-            resultado.mensaje || resultado.error || "No se pudo crear la cuenta.";
+            resultado.mensaje || resultado.error || detalle || "No se pudo crear la cuenta.";
 
         if (respuesta.ok && resultado.mensaje === "Cuenta creada exitosamente") {
             document.getElementById("form-registro").reset();
