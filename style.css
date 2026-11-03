@@ -70,6 +70,11 @@ main {
     margin: 0 auto;
 }
 
+/* El panel del banco es más ancho para poder usar dos columnas */
+main.ancho {
+    max-width: 940px;
+}
+
 /* TITULOS */
 
 h1, h2, h3 {
@@ -87,6 +92,20 @@ h1 {
 h2 {
     font-size: 1.15rem;
     font-weight: 700;
+}
+
+/* Título de cada tarjeta y texto de ayuda debajo */
+
+section h2 {
+    margin: 0 0 18px;
+}
+
+section h2 + .ayuda {
+    margin: -10px 0 22px;
+}
+
+.ayuda {
+    font-size: 0.88rem;
 }
 
 p {
@@ -145,14 +164,20 @@ section:hover,
 /* FORMULARIOS */
 
 form {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+}
+
+/* El botón del formulario ocupa todo el ancho, debajo de los campos */
+form button {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin: 8px 0 0;
 }
 
 input {
-    flex: 1 1 220px;
+    width: 100%;
     min-width: 0;
 
     padding: 15px 17px;
@@ -257,8 +282,15 @@ button:focus-visible {
     overflow-wrap: anywhere;
 }
 
+/* Se queda pegado abajo para verlo sin tener que bajar la página */
 #mensaje:not(:empty) {
+    position: sticky;
+    bottom: 16px;
+    z-index: 10;
+
     padding: 12px 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
 
     background: var(--dark-crimson);
     border: 1px solid var(--wine-red);
@@ -410,15 +442,77 @@ button:focus-visible {
     color: #d0d0d0;
 }
 
+/* PANEL: SALDO, REJILLA DE OPERACIONES Y PIE */
+
+.tarjeta-saldo {
+    text-align: center;
+}
+
+.tarjeta-saldo p {
+    margin: 0;
+}
+
+.tarjeta-saldo #btn-actualizar {
+    min-width: 200px;
+    margin-top: 4px;
+}
+
+/* Operaciones en dos columnas, con los botones alineados abajo */
+.rejilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+
+    margin: 22px 0;
+}
+
+.rejilla section {
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+}
+
+/* Campos arriba y botón siempre abajo, alineado entre tarjetas */
+.rejilla form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 14px;
+}
+
+.rejilla form button {
+    margin-top: auto;
+}
+
+.rejilla form input {
+    flex: 0 0 auto;
+}
+
+#btn-historico {
+    margin-top: 4px;
+}
+
+.pie {
+    display: flex;
+    justify-content: center;
+
+    margin: 30px 0 10px;
+}
+
+.pie button {
+    min-width: 220px;
+}
+
 /* PIX */
 
 .pix-acciones {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
 
-    margin-top: 18px;
+    margin-top: 22px;
 }
 
 .pix-acciones button {
@@ -530,6 +624,13 @@ a:hover {
 
 /* RESPONSIVE */
 
+@media (max-width: 760px) {
+    .rejilla {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
 @media (max-width: 600px) {
     body {
         padding: 22px 12px;
@@ -542,13 +643,12 @@ a:hover {
     }
 
     form {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
 
-    input,
-    form button {
+    .pix-acciones button,
+    .pie button {
         width: 100%;
-        flex-basis: auto;
     }
 
     #saldo {

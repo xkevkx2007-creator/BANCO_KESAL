@@ -7,170 +7,158 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="contenedor">
+    <main class="contenedor ancho">
         <h1>Mi Banco</h1>
 
         <h2>Bienvenido, <span id="nombre-usuario"></span></h2>
 
-        <section>
+        <!-- SALDO -->
+        <section class="tarjeta-saldo">
             <p>Tu saldo disponible es:</p>
             <h1 id="saldo">R$ 0,00</h1>
+            <button id="btn-actualizar" type="button">Actualizar saldo</button>
         </section>
 
-        <hr>
+        <!-- OPERACIONES -->
+        <div class="rejilla">
+            <section>
+                <h2>Depositar dinero</h2>
+                <p class="ayuda">Agrega saldo a tu cuenta.</p>
 
+                <form id="form-deposito">
+                    <input
+                        type="number"
+                        id="monto-deposito"
+                        placeholder="Monto en R$"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
 
+                    <button type="submit">Depositar</button>
+                </form>
+            </section>
 
-<section>
-    <h2>Depositar dinero</h2>
+            <section>
+                <h2>Retirar dinero</h2>
+                <p class="ayuda">Confirma con tu contraseña.</p>
 
-    <form id="form-deposito">
-        <input
-            type="number"
-            id="monto-deposito"
-            placeholder="Monto en R$"
-            min="0.01"
-            step="0.01"
-            required
-        >
+                <form id="form-retiro">
+                    <input
+                        type="number"
+                        id="monto-retiro"
+                        placeholder="Monto en R$"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
 
-        <button type="submit">Depositar</button>
-    </form>
-    <br>
+                    <input
+                        type="password"
+                        id="contrasena-retiro"
+                        placeholder="Confirma tu contraseña"
+                        autocomplete="current-password"
+                        required
+                    >
 
-<hr>
+                    <button type="submit">Retirar</button>
+                </form>
+            </section>
 
-<section>
-    <h2>Retirar dinero</h2>
+            <section>
+                <h2>Transferir dinero</h2>
+                <p class="ayuda">Envía dinero a otro cliente por su correo.</p>
 
-    <form id="form-retiro">
-        <input
-            type="number"
-            id="monto-retiro"
-            placeholder="Monto en R$"
-            min="0.01"
-            step="0.01"
-            required
-        >
+                <form id="form-transferencia">
+                    <input
+                        type="email"
+                        id="correo-destino"
+                        placeholder="Correo del destinatario"
+                        required
+                    >
 
-        <input
-            type="password"
-            id="contrasena-retiro"
-            placeholder="Confirma tu contraseña"
-            autocomplete="current-password"
-            required
-        >
+                    <input
+                        type="number"
+                        id="monto-transferencia"
+                        placeholder="Monto en R$"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
 
-        <button type="submit">Retirar</button>
-    </form>
-</section>
+                    <button type="submit">Transferir</button>
+                </form>
+            </section>
 
-    <br>
-    
-<hr>
+            <section>
+                <h2>Enviar PIX</h2>
+                <p class="ayuda">Usa el CPF, correo o chave aleatoria.</p>
 
-<section>
-    <h2>Transferir dinero</h2>
+                <form id="form-pix">
+                    <input
+                        type="text"
+                        id="chave-pix"
+                        placeholder="Chave PIX"
+                        title="CPF, correo o chave aleatoria"
+                        autocomplete="off"
+                        required
+                    >
 
-    <form id="form-transferencia">
-        <input
-            type="email"
-            id="correo-destino"
-            placeholder="Correo del destinatario"
-            required
-        >
+                    <input
+                        type="number"
+                        id="monto-pix"
+                        placeholder="Monto en R$"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
 
-        <input
-            type="number"
-            id="monto-transferencia"
-            placeholder="Monto en R$"
-            min="0.01"
-            step="0.01"
-            required
-        >
+                    <input
+                        type="password"
+                        id="contrasena-pix"
+                        placeholder="Confirma tu contraseña"
+                        autocomplete="current-password"
+                        required
+                    >
 
-        <button type="submit">Transferir</button>
-    </form>
-</section>
-    <br>
+                    <button type="submit">Enviar PIX</button>
+                </form>
+            </section>
+        </div>
 
-<hr>
+        <!-- CHAVES PIX -->
+        <section>
+            <h2>Mis chaves PIX</h2>
+            <p class="ayuda">Con una chave otras personas pueden enviarte dinero.</p>
 
-<section>
-    <h2>Mis chaves PIX</h2>
+            <ul id="lista-chaves"></ul>
 
-    <ul id="lista-chaves"></ul>
+            <div class="pix-acciones">
+                <button type="button" id="btn-chave-cpf">Registrar mi CPF</button>
+                <button type="button" id="btn-chave-email">Registrar mi correo</button>
+                <button type="button" id="btn-chave-aleatoria">Generar chave aleatoria</button>
+            </div>
+        </section>
 
-    <div class="pix-acciones">
-        <button type="button" id="btn-chave-cpf">Registrar mi CPF</button>
-        <button type="button" id="btn-chave-email">Registrar mi correo</button>
-        <button type="button" id="btn-chave-aleatoria">Generar chave aleatoria</button>
-    </div>
-</section>
-    <br>
+        <!-- HISTORIAL -->
+        <section>
+            <h2>Historial de movimientos</h2>
+            <p class="ayuda">Todos tus depósitos, retiros, transferencias y PIX.</p>
 
-<hr>
+            <button id="btn-historico" type="button">
+                Consultar movimientos
+            </button>
 
-<section>
-    <h2>Enviar PIX</h2>
+            <ul id="lista-historico"></ul>
+        </section>
 
-    <form id="form-pix">
-        <input
-            type="text"
-            id="chave-pix"
-            placeholder="Chave PIX"
-            title="CPF, correo o chave aleatoria"
-            autocomplete="off"
-            required
-        >
-
-        <input
-            type="number"
-            id="monto-pix"
-            placeholder="Monto en R$"
-            min="0.01"
-            step="0.01"
-            required
-        >
-
-        <input
-            type="password"
-            id="contrasena-pix"
-            placeholder="Confirma tu contraseña"
-            autocomplete="current-password"
-            required
-        >
-
-        <button type="submit">Enviar PIX</button>
-    </form>
-</section>
-    <br>
-    
-<hr>
-
-<section>
-    <h2>Historial de movimientos</h2>
-
-    <button id="btn-historico" type="button">
-        Consultar movimientos
-    </button>
-
-    <ul id="lista-historico"></ul>
-</section>
-
-    <br>
-</section>
-
-        <button id="btn-actualizar">Actualizar saldo</button>
-        <br>
-        <br>
-        <button id="btn-salir" type="button">Cerrar sesión</button>
+        <div class="pie">
+            <button id="btn-salir" type="button">Cerrar sesión</button>
+        </div>
 
         <p id="mensaje"></p>
     </main>
 
     <script src="banco.js"></script>
-
-
 </body>
 </html>
