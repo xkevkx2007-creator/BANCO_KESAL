@@ -296,8 +296,22 @@ document.getElementById("btn-historico").addEventListener(
                 let signo = "";
                 let descripcion = tipoOriginal || "Movimiento";
 
+                // PIX
+                if (tipo.includes("pix")) {
+                    if (tipo.includes("recib")) {
+                        clase = "movimiento-deposito";
+                        icono = "↓";
+                        signo = "+";
+                        descripcion = "PIX recibido";
+                    } else {
+                        clase = "movimiento-retiro";
+                        icono = "↑";
+                        signo = "−";
+                        descripcion = "PIX enviado";
+                    }
+
                 // Depósito
-                if (
+                } else if (
                     tipo.includes("deposit") ||
                     tipo.includes("depósito") ||
                     tipo.includes("deposito")
@@ -369,3 +383,247 @@ document.getElementById("btn-historico").addEventListener(
         }
     }
 );
+
+// ========================================
+// PIX (SIMULADO)
+// ========================================
+
+const ETIQUETAS_CHAVE = {
+    cpf: "CPF",
+    email: "Correo",
+    aleatoria: "Aleatoria"
+};
+
+function mostrarMensaje(texto) {
+    document.getElementById("mensaje").textContent = texto;
+}
+
+async function cargarChaves() {
+    const lista = document.getElementById("lista-chaves");
+
+    try {
+        const respuesta = await fetch(
+            `${API_URL}/pix/chaves/${encodeURIComponent(correoUsuario)}`
+        );
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            mostrarMensaje(
+                datos.detail || "No se pudieron cargar tus chaves PIX."
+            );
+            return;
+        }
+
+        lista.replaceChildren();
+
+        if (datos.chaves.length === 0) {
+            const vacio = document.createElement("li");
+            vacio.className = "chave-vacia";
+            vacio.textContent = "Todavía no tienes chaves PIX.";
+            lista.appendChild(vacio);
+            return;
+        }
+
+        datos.chaves.forEach((chave) => {
+            const item = document.createElement("li");
+            item.className = "chave-item";
+
+            const tipo = document.createElement("span");
+            tipo.className = "chave-tipo";
+            tipo.textContent = ETIQUETAS_CHAVE[chave.tipo] || chave.tipo;
+
+            const valor = document.createElement("span");
+            valor.className = "chave-valor";
+            valor.textContent = chave.valor;
+
+            const eliminar = document.createElement("button");
+            eliminar.type = "button";
+            eliminar.textContent = "Eliminar";
+            eliminar.addEventListener("click", () =>
+                eliminarChave(chave.valor)
+            );
+
+            item.append(tipo, valor, eliminar);
+            lista.appendChild(item);
+        });
+
+    } catch (error) {
+        mostrarMensaje("No se pudo conectar con el servidor.");
+    }
+}
+
+async function registrarChave(tipo) {
+    try {
+        const respuesta = await fetch(`${API_URL}/pix/chaves`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                correo: correoUsuario,
+                tipo: tipo
+            })
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            mostrarMensaje(
+                typeof datos.detail === "string"
+                    ? datos.detail
+                    : "No se pudo registrar la chave."
+            );
+            return;
+        }
+
+        mostrarMensaje(datos.mensaje);
+        await cargarChaves();
+
+    } catch (error) {
+        mostrarMensaje("No se pudo conectar con el servidor.");
+    }
+}
+
+async function eliminarChave(valor) {
+    if (!confirm(`¿Eliminar la chave ${valor}?`)) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_URL}/pix/chaves/eliminar`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                correo: correoUsuario,
+                chave: valor
+            })
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            mostrarMensaje(
+                typeof datos.detail === "string"
+                    ? datos.detail
+                    : "No se pudo eliminar la chave."
+            );
+            return;
+        }
+
+        mostrarMensaje(datos.mensaje);
+        await cargarChaves();
+
+    } catch (error) {
+        mostrarMensaje("No se pudo conectar con el servidor.");
+    }
+}
+
+document.getElementById("btn-chave-cpf").addEventListener(
+    "click",
+    () => registrarChave("cpf")
+);
+
+document.getElementById("btn-chave-email").addEventListener(
+    "click",
+    () => registrarChave("email")
+);
+
+document.getElementById("btn-chave-aleatoria").addEventListener(
+    "click",
+    () => registrarChave("aleatoria")
+);
+
+document.getElementById("form-pix").addEventListener(
+    "submit",
+    async (event) => {
+        event.preventDefault();
+
+        const chave = document.getElementById("chave-pix").value.trim();
+        const campoContrasena = document.getElementById("contrasena-pix");
+
+        const monto = Number(
+            document.getElementById("monto-pix").value
+        );
+
+        if (!Number.isFinite(monto) || monto <= 0) {
+            mostrarMensaje("El monto debe ser mayor que cero.");
+            return;
+        }
+
+        try {
+            // 1) Ver a quién pertenece la chave y pedir confirmación
+            const consulta = await fetch(
+                `${API_URL}/pix/consultar/${encodeURIComponent(chave)}`
+            );
+
+            const destino = await consulta.json();
+
+            if (!consulta.ok) {
+                mostrarMensaje(
+                    typeof destino.detail === "string"
+                        ? destino.detail
+                        : "No se pudo consultar la chave PIX."
+                );
+                return;
+            }
+
+            const montoTexto = monto.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            });
+
+            if (!confirm(`¿Enviar ${montoTexto} por PIX a ${destino.nombre}?`)) {
+                mostrarMensaje("PIX cancelado.");
+                return;
+            }
+
+            // 2) Enviar el PIX
+            const respuesta = await fetch(`${API_URL}/pix/enviar`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    correo_origen: correoUsuario,
+                    chave: chave,
+                    monto: monto,
+                    contraseña: campoContrasena.value
+                })
+            });
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) {
+                mostrarMensaje(
+                    typeof datos.detail === "string"
+                        ? datos.detail
+                        : "No se pudo enviar el PIX."
+                );
+
+                // Por seguridad, limpiar la contraseña tras un intento fallido
+                campoContrasena.value = "";
+                return;
+            }
+
+            mostrarMensaje(datos.mensaje);
+
+            document.getElementById("form-pix").reset();
+
+            await consultarSaldo();
+
+            // consultarSaldo() borra el mensaje: volver a mostrarlo
+            mostrarMensaje(datos.mensaje);
+
+        } catch (error) {
+            mostrarMensaje("No se pudo conectar con el servidor.");
+        }
+    }
+);
+
+// Cargar las chaves al entrar
+if (nombreUsuario && correoUsuario) {
+    cargarChaves();
+}

@@ -93,6 +93,58 @@
     </form>
 </section>
     <br>
+
+<hr>
+
+<section>
+    <h2>Mis chaves PIX</h2>
+
+    <ul id="lista-chaves"></ul>
+
+    <div class="pix-acciones">
+        <button type="button" id="btn-chave-cpf">Registrar mi CPF</button>
+        <button type="button" id="btn-chave-email">Registrar mi correo</button>
+        <button type="button" id="btn-chave-aleatoria">Generar chave aleatoria</button>
+    </div>
+</section>
+    <br>
+
+<hr>
+
+<section>
+    <h2>Enviar PIX</h2>
+
+    <form id="form-pix">
+        <input
+            type="text"
+            id="chave-pix"
+            placeholder="Chave PIX"
+            title="CPF, correo o chave aleatoria"
+            autocomplete="off"
+            required
+        >
+
+        <input
+            type="number"
+            id="monto-pix"
+            placeholder="Monto en R$"
+            min="0.01"
+            step="0.01"
+            required
+        >
+
+        <input
+            type="password"
+            id="contrasena-pix"
+            placeholder="Confirma tu contraseña"
+            autocomplete="current-password"
+            required
+        >
+
+        <button type="submit">Enviar PIX</button>
+    </form>
+</section>
+    <br>
     
 <hr>
 

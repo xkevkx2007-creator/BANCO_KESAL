@@ -1,8 +1,20 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Sistema Bancario")
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+import database
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Crea las tablas (y los usuarios de ejemplo) al arrancar el servidor
+    database.init_db()
+    yield
+
+
+app = FastAPI(title="Sistema Bancario", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,30 +29,9 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Datos temporales en memoria
-usuarios = [
-    {
-        "nombre": "Juan Pérez",
-        "correo": "juan.perez@example.com",
-        "contraseña": "password123",
-        "saldo": 100.0,
-        "historico": []
-    },
-    {
-        "nombre": "María López",
-        "correo": "maria.lopez@example.com",
-        "contraseña": "password456",
-        "saldo": 100.0,
-        "historico": []
-    },
-    {
-        "nombre": "Kevin Martínez",
-        "correo": "kevin.martinez@example.com",
-        "contraseña": "password789",
-        "saldo": 100.0,
-        "historico": []
-    }
-]
+
+def _http_error(error: database.ErrorBanco) -> HTTPException:
+    return HTTPException(status_code=error.status, detail=error.detalle)
 
 
 # Datos recibidos desde el frontend
@@ -49,12 +40,45 @@ class UsuarioEntrada(BaseModel):
     cpf: str
     correo: str
     contraseña: str
-    
+
 
 class LoginEntrada(BaseModel):
     nombre: str
     contraseña: str
 
+
+class DepositoEntrada(BaseModel):
+    correo: str
+    monto: float = Field(gt=0, allow_inf_nan=False)
+
+
+class RetiroEntrada(BaseModel):
+    correo: str
+    contraseña: str
+    monto: float = Field(gt=0, allow_inf_nan=False)
+
+
+class TransferenciaEntrada(BaseModel):
+    correo_origen: str
+    correo_destino: str
+    monto: float = Field(gt=0, allow_inf_nan=False)
+
+
+class ChaveCrearEntrada(BaseModel):
+    correo: str
+    tipo: str
+
+
+class ChaveEliminarEntrada(BaseModel):
+    correo: str
+    chave: str
+
+
+class PixEntrada(BaseModel):
+    correo_origen: str
+    chave: str
+    contraseña: str
+    monto: float = Field(gt=0, allow_inf_nan=False)
 
 
 # Página de prueba de la API
@@ -67,228 +91,155 @@ def inicio():
 @app.post("/usuarios")
 def crear_cuenta(datos: UsuarioEntrada):
 
-    cpf = datos.cpf.strip()
-
-    # El CPF debe tener exactamente 11 caracteres y todos deben ser dígitos 0-9
-    if len(cpf) != 11 or not all(c in "0123456789" for c in cpf):
-        return {"error": "El CPF debe tener exactamente 11 números"}
-
-    for usuario in usuarios:
-        if usuario["correo"] == datos.correo:
-            return {"error": "El correo ya está registrado"}
-
-        if usuario.get("cpf") == cpf:
-            return {"error": "El CPF ya está registrado"}
-
-    nuevo_usuario = {
-        "nombre": datos.nombre,
-        "cpf": cpf,
-        "correo": datos.correo,
-        "contraseña": datos.contraseña,
-        "saldo": 0.0,
-        "historico": []
-    }
-
-    usuarios.append(nuevo_usuario)
+    try:
+        usuario = database.crear_usuario(
+            datos.nombre, datos.cpf, datos.correo, datos.contraseña
+        )
+    except database.ErrorBanco as error:
+        return {"error": error.detalle}
 
     return {
         "mensaje": "Cuenta creada exitosamente",
-        "nombre": nuevo_usuario["nombre"]
+        "nombre": usuario["nombre"]
     }
 
 
 # Iniciar sesión
-
 @app.post("/login")
 def iniciar_sesion(datos: LoginEntrada):
 
-    for usuario in usuarios:
-        if (
-            usuario["nombre"] == datos.nombre
-            and usuario["contraseña"] == datos.contraseña
-        ):
-            return {
-                "mensaje": "Inicio de sesión exitoso",
-                "nombre": usuario["nombre"],
-                "correo": usuario["correo"]
-            }
+    usuario = database.autenticar(datos.nombre, datos.contraseña)
 
-    return {"error": "Usuario o contraseña incorrectos"}
+    if usuario is None:
+        return {"error": "Usuario o contraseña incorrectos"}
 
+    return {
+        "mensaje": "Inicio de sesión exitoso",
+        "nombre": usuario["nombre"],
+        "correo": usuario["correo"]
+    }
 
-
-from fastapi import HTTPException
 
 @app.get("/saldo/{correo}")
 def consultar_saldo(correo: str):
 
-    for usuario in usuarios:
-        if usuario["correo"] == correo:
-            return {
-                "nombre": usuario["nombre"],
-                "saldo": usuario["saldo"]
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
-
-
-
-from pydantic import BaseModel, Field
-from fastapi import HTTPException
-
-class DepositoEntrada(BaseModel):
-    correo: str
-    monto: float = Field(gt=0, allow_inf_nan=False)
+    try:
+        return database.obtener_saldo(correo)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
 
 
 @app.post("/depositar")
 def depositar(datos: DepositoEntrada):
 
-    for usuario in usuarios:
-        if usuario["correo"] == datos.correo:
+    try:
+        resultado = database.depositar(datos.correo, datos.monto)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
 
-            usuario["saldo"] += datos.monto
-
-            usuario["historico"].append(
-                ("depósito", datos.monto, None)
-            )
-
-            return {
-                "mensaje": "Depósito realizado exitosamente",
-                "saldo": usuario["saldo"]
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
-
-
-class RetiroEntrada(BaseModel):
-    correo: str
-    contraseña: str
-    monto: float = Field(gt=0, allow_inf_nan=False)
+    return {
+        "mensaje": "Depósito realizado exitosamente",
+        "saldo": resultado["saldo"]
+    }
 
 
 @app.post("/retirar")
 def retirar(datos: RetiroEntrada):
 
-    for usuario in usuarios:
-        if usuario["correo"] == datos.correo:
+    try:
+        resultado = database.retirar(
+            datos.correo, datos.contraseña, datos.monto
+        )
+    except database.ErrorBanco as error:
+        raise _http_error(error)
 
-            # La contraseña debe coincidir con la de la cuenta
-            if datos.contraseña != usuario["contraseña"]:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Contraseña incorrecta. No se realizó el retiro."
-                )
-
-            if datos.monto > usuario["saldo"]:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Saldo insuficiente"
-                )
-
-            usuario["saldo"] -= datos.monto
-
-            usuario["historico"].append(
-                ("retiro", datos.monto, None)
-            )
-
-            return {
-                "mensaje": "Retiro realizado exitosamente",
-                "saldo": usuario["saldo"]
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
+    return {
+        "mensaje": "Retiro realizado exitosamente",
+        "saldo": resultado["saldo"]
+    }
 
 
-class TransferenciaEntrada(BaseModel):
-    correo_origen: str
-    correo_destino: str
-    monto: float = Field(gt=0, allow_inf_nan=False)
-    
 @app.post("/transferir")
 def transferir(datos: TransferenciaEntrada):
-    remitente = None
-    destinatario = None
 
-    for usuario in usuarios:
-        if usuario["correo"] == datos.correo_origen:
-            remitente = usuario
-
-        if usuario["correo"] == datos.correo_destino:
-            destinatario = usuario
-
-    if remitente is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Cuenta de origen no encontrada"
+    try:
+        resultado = database.transferir(
+            datos.correo_origen, datos.correo_destino, datos.monto
         )
-
-    if destinatario is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Cuenta de destino no encontrada"
-        )
-
-    if remitente["correo"] == destinatario["correo"]:
-        raise HTTPException(
-            status_code=400,
-            detail="No puedes transferir dinero a tu propia cuenta"
-        )
-
-    if datos.monto > remitente["saldo"]:
-        raise HTTPException(
-            status_code=400,
-            detail="Saldo insuficiente"
-        )
-
-    remitente["saldo"] -= datos.monto
-    destinatario["saldo"] += datos.monto
-
-    remitente["historico"].append(
-        ("transferencia enviada", datos.monto, destinatario["nombre"])
-    )
-
-    destinatario["historico"].append(
-        ("transferencia recibida", datos.monto, remitente["nombre"])
-    )
+    except database.ErrorBanco as error:
+        raise _http_error(error)
 
     return {
         "mensaje": "Transferencia realizada exitosamente",
-        "saldo": remitente["saldo"]
+        "saldo": resultado["saldo"]
     }
-    
 
 
 @app.get("/historico/{correo}")
 def consultar_historico(correo: str):
-    for usuario in usuarios:
-        if usuario["correo"] == correo:
-            movimientos = []
 
-            for movimiento in usuario["historico"]:
-                tipo, monto, otra_persona = movimiento
+    try:
+        return database.obtener_historico(correo)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
 
-                movimientos.append({
-                    "tipo": tipo,
-                    "monto": monto,
-                    "otra_persona": otra_persona
-                })
 
-            return {
-                "nombre": usuario["nombre"],
-                "historico": movimientos
-            }
+# ---------------- PIX (simulado) ----------------
 
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
+@app.get("/pix/chaves/{correo}")
+def listar_chaves(correo: str):
+
+    try:
+        return database.listar_chaves(correo)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
+
+
+@app.post("/pix/chaves")
+def crear_chave(datos: ChaveCrearEntrada):
+
+    try:
+        chave = database.crear_chave(datos.correo, datos.tipo)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
+
+    return {
+        "mensaje": "Chave PIX registrada exitosamente",
+        "chave": chave
+    }
+
+
+@app.post("/pix/chaves/eliminar")
+def eliminar_chave(datos: ChaveEliminarEntrada):
+
+    try:
+        database.eliminar_chave(datos.correo, datos.chave)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
+
+    return {"mensaje": "Chave PIX eliminada"}
+
+
+@app.get("/pix/consultar/{chave}")
+def consultar_chave(chave: str):
+
+    try:
+        return database.consultar_chave(chave)
+    except database.ErrorBanco as error:
+        raise _http_error(error)
+
+
+@app.post("/pix/enviar")
+def enviar_pix(datos: PixEntrada):
+
+    try:
+        resultado = database.enviar_pix(
+            datos.correo_origen, datos.chave, datos.contraseña, datos.monto
+        )
+    except database.ErrorBanco as error:
+        raise _http_error(error)
+
+    return {
+        "mensaje": f"PIX enviado a {resultado['destinatario']}",
+        "saldo": resultado["saldo"]
+    }
