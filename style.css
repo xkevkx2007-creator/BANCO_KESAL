@@ -1,8 +1,11 @@
 /* ==========================================
    SISTEMA BANCARIO - NEGRO Y ROJO VINO
+   Responsive: celular, tablet y escritorio
    ========================================== */
 
 :root {
+    color-scheme: dark;
+
     /* Paleta principal */
     --pure-black: #050505;
     --dark: #0d0d0d;
@@ -21,6 +24,13 @@
     --placeholder: #6f6f6f;
     --accent-soft: #e58a97;
 
+    /* Medidas fluidas: se adaptan solas al ancho de la pantalla */
+    --gutter: clamp(12px, 3.5vw, 28px);
+    --espacio-pagina: clamp(22px, 5vw, 40px);
+    --pad-tarjeta: clamp(18px, 4.2vw, 26px);
+    --separacion: clamp(14px, 3vw, 22px);
+    --alto-tactil: 46px;
+
     --radius: 15px;
 }
 
@@ -32,12 +42,23 @@
 
 html {
     scroll-behavior: smooth;
+
+    /* Evita que el celular agrande el texto al girar la pantalla */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 body {
     margin: 0;
     min-height: 100vh;
-    padding: 40px 18px;
+    min-height: 100dvh;
+
+    /* Respeta el notch y las barras del celular */
+    padding:
+        max(var(--espacio-pagina), env(safe-area-inset-top))
+        max(var(--gutter), env(safe-area-inset-right))
+        max(var(--espacio-pagina), env(safe-area-inset-bottom))
+        max(var(--gutter), env(safe-area-inset-left));
 
     background:
         radial-gradient(
@@ -54,6 +75,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -84,7 +107,7 @@ h1, h2, h3 {
 }
 
 h1 {
-    font-size: clamp(2rem, 5vw, 2.7rem);
+    font-size: clamp(1.8rem, 5vw + 0.4rem, 2.7rem);
     font-weight: 800;
     letter-spacing: -1.5px;
 }
@@ -124,8 +147,8 @@ hr {
 section,
 .card {
     width: 100%;
-    margin: 20px 0;
-    padding: 26px;
+    margin: var(--separacion) 0;
+    padding: var(--pad-tarjeta);
 
     background: var(--dark);
 
@@ -138,13 +161,6 @@ section,
     transition: all 0.25s ease;
 }
 
-section:hover,
-.card:hover {
-    background: var(--graphite);
-    border-color: var(--steel-gray);
-    border-top-color: var(--accent-red);
-}
-
 /* SALDO */
 
 #saldo {
@@ -153,7 +169,8 @@ section:hover,
     color: #ffffff;
     text-shadow: 0 0 40px rgba(179, 58, 74, 0.45);
 
-    font-size: clamp(2.3rem, 6vw, 3.2rem);
+    /* Escala con el ancho de la pantalla para que el monto no se parta */
+    font-size: clamp(1.6rem, 8.2vw, 3.2rem);
     font-weight: 800;
     letter-spacing: -1.5px;
 
@@ -165,7 +182,7 @@ section:hover,
 
 form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
     gap: 14px;
 }
 
@@ -179,6 +196,7 @@ form button {
 input {
     width: 100%;
     min-width: 0;
+    min-height: var(--alto-tactil);
 
     padding: 15px 17px;
 
@@ -189,7 +207,10 @@ input {
     border-radius: 11px;
 
     outline: none;
+
+    /* 16px o más: evita el zoom automático de iPhone al tocar un campo */
     font: inherit;
+    font-size: max(1rem, 16px);
     text-align: center;
 
     transition: all 0.2s ease;
@@ -197,10 +218,6 @@ input {
 
 input::placeholder {
     color: var(--placeholder);
-}
-
-input:hover {
-    border-color: var(--gray);
 }
 
 input:focus {
@@ -216,6 +233,7 @@ button {
     margin-left: auto;
     margin-right: auto;
 
+    min-height: var(--alto-tactil);
     padding: 14px 23px;
 
     color: #ffffff;
@@ -228,14 +246,9 @@ button {
     font-weight: 700;
 
     cursor: pointer;
+    touch-action: manipulation;
 
     transition: all 0.2s ease;
-}
-
-button:hover {
-    background: var(--accent-red);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(139, 38, 53, 0.45);
 }
 
 button:active {
@@ -257,15 +270,7 @@ button:focus-visible {
     border-color: var(--gray);
 }
 
-#btn-actualizar:hover,
-#btn-historico:hover,
-#btn-salir:hover {
-    background: var(--gray);
-    border-color: #777777;
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
-}
-
-#btn-salir:hover {
+#btn-salir:active {
     background: var(--dark-crimson);
     border-color: var(--accent-red);
 }
@@ -285,7 +290,7 @@ button:focus-visible {
 /* Se queda pegado abajo para verlo sin tener que bajar la página */
 #mensaje:not(:empty) {
     position: sticky;
-    bottom: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
     z-index: 10;
 
     padding: 12px 16px;
@@ -342,12 +347,6 @@ button:focus-visible {
     text-align: left;
 
     transition: all 0.2s ease;
-}
-
-#lista-historico .movimiento-item:hover {
-    background: var(--graphite);
-    border-color: var(--steel-gray);
-    transform: translateY(-2px);
 }
 
 /* ICONOS */
@@ -461,9 +460,9 @@ button:focus-visible {
 .rejilla {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
+    gap: var(--separacion);
 
-    margin: 22px 0;
+    margin: var(--separacion) 0;
 }
 
 .rejilla section {
@@ -522,12 +521,6 @@ button:focus-visible {
     border-color: var(--gray);
 }
 
-.pix-acciones button:hover {
-    background: var(--gray);
-    border-color: #777777;
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
-}
-
 #lista-chaves {
     display: grid;
     gap: 10px;
@@ -579,7 +572,10 @@ button:focus-visible {
 .chave-item button {
     flex-shrink: 0;
     margin: 0;
-    padding: 8px 14px;
+    padding: 8px 16px;
+
+    /* Área táctil mínima recomendada: 44px */
+    min-height: 44px;
 
     font-size: 0.85rem;
 
@@ -587,7 +583,7 @@ button:focus-visible {
     border-color: var(--gray);
 }
 
-.chave-item button:hover {
+.chave-item button:active {
     background: var(--dark-crimson);
     border-color: var(--accent-red);
 }
@@ -597,10 +593,6 @@ button:focus-visible {
 a {
     color: var(--accent-soft);
     text-decoration: none;
-}
-
-a:hover {
-    color: #ffffff;
 }
 
 /* SCROLLBAR */
@@ -618,45 +610,105 @@ a:hover {
     border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--wine-red);
+/* ==========================================
+   EFECTOS AL PASAR EL MOUSE
+   Solo en dispositivos con mouse: en celulares y tablets el
+   "hover" se queda pegado después de tocar, por eso se separa.
+   ========================================== */
+
+@media (hover: hover) and (pointer: fine) {
+
+    section:hover,
+    .card:hover {
+        background: var(--graphite);
+        border-color: var(--steel-gray);
+        border-top-color: var(--accent-red);
+    }
+
+    input:hover {
+        border-color: var(--gray);
+    }
+
+    button:hover {
+        background: var(--accent-red);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 22px rgba(139, 38, 53, 0.45);
+    }
+
+    button:active {
+        background: var(--dark-crimson);
+        transform: scale(0.97);
+    }
+
+    #btn-actualizar:hover,
+    #btn-historico:hover,
+    #btn-salir:hover,
+    .pix-acciones button:hover {
+        background: var(--gray);
+        border-color: #777777;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+    }
+
+    #btn-salir:hover,
+    .chave-item button:hover {
+        background: var(--dark-crimson);
+        border-color: var(--accent-red);
+    }
+
+    #lista-historico .movimiento-item:hover {
+        background: var(--graphite);
+        border-color: var(--steel-gray);
+        transform: translateY(-2px);
+    }
+
+    a:hover {
+        color: #ffffff;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--wine-red);
+    }
 }
 
-/* RESPONSIVE */
+/* ==========================================
+   RESPONSIVE
+   ≤ 700px   celular y tablet pequeña en vertical
+   ≤ 600px   celular
+   ≤ 480px   celular compacto
+   ≤ 360px   celulares muy pequeños
+   horizontal con poca altura (celular girado)
+   ========================================== */
 
-@media (max-width: 760px) {
+/* Tablet en vertical y celulares grandes: una sola columna de tarjetas */
+@media (max-width: 700px) {
     .rejilla {
         grid-template-columns: 1fr;
-        gap: 16px;
     }
 }
 
+/* Celular */
 @media (max-width: 600px) {
-    body {
-        padding: 22px 12px;
-    }
-
-    section,
-    .card {
-        padding: 19px;
-        margin: 14px 0;
-    }
-
     form {
         grid-template-columns: 1fr;
     }
 
     .pix-acciones button,
-    .pie button {
+    .pie button,
+    .tarjeta-saldo #btn-actualizar {
         width: 100%;
     }
 
-    #saldo {
-        font-size: 2.2rem;
+    .pix-acciones {
+        flex-direction: column;
     }
 }
 
+/* Celular compacto */
 @media (max-width: 480px) {
+    section h2 + .ayuda {
+        margin-bottom: 18px;
+    }
+
     .chave-item {
         flex-wrap: wrap;
     }
@@ -685,5 +737,83 @@ a:hover {
 
     .movimiento-valor {
         font-size: 0.85rem;
+    }
+}
+
+/* Celulares estrechos: el monto del movimiento pasa a una fila propia
+   para que el nombre tenga todo el ancho disponible */
+@media (max-width: 420px) {
+    #lista-historico .movimiento-item {
+        flex-wrap: wrap;
+    }
+
+    .movimiento-detalles {
+        flex: 1 1 calc(100% - 56px);
+    }
+
+    .movimiento-valor {
+        flex: 1 1 100%;
+        padding-top: 8px;
+
+        border-top: 1px solid var(--charcoal);
+        font-size: 0.95rem;
+        text-align: right;
+    }
+}
+
+/* Celulares muy pequeños (320px) */
+@media (max-width: 360px) {
+    h1 {
+        letter-spacing: -1px;
+    }
+
+    button {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .movimiento-subtitulo {
+        display: none;
+    }
+}
+
+/* Celular girado (horizontal): poca altura, se compacta el espacio vertical */
+@media (max-height: 520px) and (orientation: landscape) {
+    body {
+        padding-top: max(14px, env(safe-area-inset-top));
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+    }
+
+    h1 {
+        margin: 0.2em 0;
+    }
+
+    #saldo {
+        margin: 8px 0 14px;
+        font-size: 2rem;
+    }
+
+    #mensaje:not(:empty) {
+        bottom: 8px;
+    }
+
+    .pie {
+        margin-top: 18px;
+    }
+}
+
+/* Para quienes piden menos movimiento en su sistema */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+
+    button:hover,
+    button:active,
+    #lista-historico .movimiento-item:hover {
+        transform: none !important;
     }
 }
